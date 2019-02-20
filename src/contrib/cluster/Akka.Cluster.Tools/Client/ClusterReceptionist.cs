@@ -17,6 +17,7 @@ using Akka.Remote;
 using Akka.Routing;
 using Akka.Util;
 using Akka.Util.Internal;
+using Newtonsoft.Json;
 
 namespace Akka.Cluster.Tools.Client
 {
@@ -297,7 +298,7 @@ namespace Akka.Cluster.Tools.Client
         /// <summary>
         /// TBD
         /// </summary>
-        internal class RingOrdering : IComparer<Address>
+        public class RingOrdering : IComparer<Address> // made public for testing purposes
         {
             /// <summary>
             /// The singleton instance of this comparer
@@ -485,6 +486,8 @@ namespace Akka.Cluster.Tools.Client
                         .Select(m => m.Address));
 
                 _consistentHash = ConsistentHash.Create(_nodes, _virtualNodesFactor);
+
+                Console.WriteLine($"Current cluster state - {LogState()}");
             }
             else if (message is ClusterEvent.MemberUp)
             {
@@ -494,9 +497,12 @@ namespace Akka.Cluster.Tools.Client
                     _nodes = _nodes.Add(up.Member.Address);
                     _consistentHash = ConsistentHash.Create(_nodes, _virtualNodesFactor);
                 }
+
+                Console.WriteLine($"Member up - {LogState()}");
             }
             else if (message is ClusterEvent.MemberRemoved)
             {
+                var preCount = _nodes.Count;
                 var removed = (ClusterEvent.MemberRemoved)message;
 
                 if (removed.Member.Address.Equals(_cluster.SelfAddress))
@@ -507,6 +513,17 @@ namespace Akka.Cluster.Tools.Client
                 {
                     _nodes = _nodes.Remove(removed.Member.Address);
                     _consistentHash = ConsistentHash.Create(_nodes, _virtualNodesFactor);
+
+                    Console.WriteLine($"Member removed - {LogState()}");
+                    if (preCount == _nodes.Count)
+                    {
+                        Console.WriteLine("0 nodes removed?");
+                        Console.WriteLine(IsMatchingRole(removed.Member)); // seems fine
+                        Console.WriteLine(string.Join(", ", _nodes.Select(x => $"{x} - {RingOrdering.Instance.Compare(x, removed.Member.Address)}"))); // seems fine
+                        Console.WriteLine(string.Join(", ", _nodes.Select(x => $"{x} - {x.CompareTo(removed.Member.Address)}"))); // seems fine
+                        Console.WriteLine(_nodes.Contains(removed.Member.Address)); // returns false?!
+                        Console.WriteLine(JsonConvert.SerializeObject(message)); // deep look
+                    }
                 }
             }
             else if (message is ClusterEvent.IMemberEvent)
@@ -573,6 +590,11 @@ namespace Akka.Cluster.Tools.Client
                 }
             }
             _clientsPublished = publishableClients;
+        }
+
+        private string LogState()
+        {
+            return $"{_nodes.Count} nodes, {string.Join(", ", _nodes)}";
         }
     }
 
