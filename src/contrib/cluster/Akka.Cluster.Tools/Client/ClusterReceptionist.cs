@@ -298,7 +298,7 @@ namespace Akka.Cluster.Tools.Client
         /// <summary>
         /// TBD
         /// </summary>
-        public class RingOrdering : IComparer<Address> // made public for testing purposes
+        internal class RingOrdering : IComparer<Address> // made public for testing purposes
         {
             /// <summary>
             /// The singleton instance of this comparer
