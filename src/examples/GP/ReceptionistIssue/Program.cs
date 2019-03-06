@@ -16,12 +16,12 @@ namespace ReceptionistIssue
     class Program
     {
         // how to reproduce?
-        // run first seed node with dotnet .\ReceptionistIssue.dll 8081
-        // run second node with dotnet .\ReceptionistIssue.dll
-        // run third node with dotnet .\ReceptionistIssue.dll and close the second one while third is starting
-        // first and third node should log having MemberRemoved but no nodes removed
-
-        // 
+        // 1. run first seed node with dotnet .\ReceptionistIssue.dll 8081
+        // 2. run second node with dotnet .\ReceptionistIssue.dll 55597
+        // 3. run third node with dotnet .\ReceptionistIssue.dll 55622
+        // 4. close the second by typing any key, first and third node should log receiving MemberRemoved but no nodes removed from _nodes collection
+        // 5. starting second node again results in "An item with the same key has already been added. Key: [1661871636, akka.tcp://MySystem@localhost:55597]"
+        //    exception on first and third node
 
         static void Main(string[] args)
         {

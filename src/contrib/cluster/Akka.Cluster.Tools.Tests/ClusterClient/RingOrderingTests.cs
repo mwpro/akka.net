@@ -14,6 +14,9 @@ namespace Akka.Cluster.Tools.Tests.ClusterClient
 {
     public class RingOrderingTests
     {
+        // JVM
+        // https://github.com/akka/akka/blob/master/akka-cluster-tools/src/main/scala/akka/cluster/client/ClusterClient.scala#L894-L899
+
         [Fact]
         public void AddTest()
         {
